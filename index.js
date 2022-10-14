@@ -1,5 +1,6 @@
-const prompts = require("prompts");
-const {getFullArticles2, get40News2, getPoints2, getFirstArticle2, getNumberOfNewsBuffered} = require("./requests.js");
+import prompts from "prompts";
+import {getNumberOfNewsBuffered, getNewsFromNewsApi2, callAPI} from "./requests.js";
+
 
 
 
@@ -31,11 +32,11 @@ async function example6(){
 	
 	if(type === "buffered"){
 
-		return getNumberOfNewsBuffered(number);
+		return callAPI(number);
 	}
 	else{
 
-		return getNumberOfNewsBuffered(number);
+		return callAPI(number);
 	}
 
 
