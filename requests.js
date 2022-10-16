@@ -50,28 +50,63 @@ async function callAPI(number){
 }
 
 
-
-async function* promisesToAsyncIterator(promises) {
-
+async function* promisesToAsyncIterator(promises){    
     const promisesByKey = new Map();
 
-
-    for (let i = 0; i < promises.length; i++) {
+    for (let i = 0; i< promises.length; i++){
         promisesByKey.set(
             i,
-            promises[i].then((value) => ({ value, key: i}))
-        );
-    }
-    
-    while (promisesByKey.size > 0) {
+            promises[i].then((value) => ({value, key: i})));
+        }
+        
+    while (promisesByKey.size > 0){
         const promise = await Promise.any(promisesByKey.values());
-        promise.then(console.log);
         promisesByKey.delete(promise.key);
-        yield promise.value;
+        yield promise.value
     }
 }
 
-export {callAPI};
+
+
+
+async function getNewsByIterator(numOfNews) {
+    
+    const loops = Math.ceil(numOfNews / 20);
+    let newsApi = [];
+   
+    for (let i = 0; i < loops; i++) {
+      const response = await fetch(`https://hn.algolia.com/api/v1/search?page=${i}`);
+      const json = await response.json();
+      const title = json.hits.map(hit => ansiEscapes.link(hit.title, hit.url));
+      title.map(link => newsApi.push(new Promise(resolve => setTimeout(() => resolve(link), 500))));
+    }
+
+    const loops2 = Math.ceil(numOfNews / 100);
+    let newsApi2 = [];
+
+    for (let i = 1; i <= loops2; i++) {
+        const newsJSON = await newsapi.v2.everything({
+            q: "bitcoin",
+            from: "2022-10-10",
+            to: "2022-10-11",
+            language: "en",
+            sortBt: "relevancy",
+            page:`${i}`
+        })
+
+      const title = newsJSON.articles.map(article => ansiEscapes.link(article.title, article.url));
+      title.map(link => newsApi2.push(new Promise(resolve => setTimeout(() => resolve(link), 500))));
+  }
+
+    const result = newsApi.flat().slice(0, numOfNews).concat(newsApi2.flat().slice(0, numOfNews));
+      
+    for await (const promiseValue of promisesToAsyncIterator(result)){
+        console.log(promiseValue);
+    }
+}
+
+
+export {callAPI, getNewsByIterator};
 
 
 
