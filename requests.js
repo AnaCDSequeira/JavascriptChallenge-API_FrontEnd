@@ -18,11 +18,11 @@ async function getNumberOfNewsBuffered(numberOfnews){
     return arrayOfNews.flat().slice(0,numberOfnews);
 }
 
+
 async function getNewsFromNewsApi2(numberOfNews){
 
     const loops = Math.ceil(numberOfNews / 100);
     const arrayOfNews = [];
-
 
     for(let i = 1; i <= loops; i++){
 
@@ -35,20 +35,19 @@ async function getNewsFromNewsApi2(numberOfNews){
             page:`${i}`
         })
 
-        arrayOfNews.push(newsJSON.articles);
+        const resultArray = newsJSON.articles.map(e => ansiEscapes.link(e.title, e.url));
+        arrayOfNews.push(resultArray);
     }
     
-    
-    return arrayOfNews.flat().slice(0,numberOfNews)
-                      .map(e => ansiEscapes.link(e.title, e.url));
+    return arrayOfNews.flat().slice(0,numberOfNews);
 }
+
 
 async function callAPI(number){
     const arr = await getNumberOfNewsBuffered(number);
     const arr2 = await getNewsFromNewsApi2(number);
     return arr.concat(arr2).join("\n");
 }
-
 
 
 
