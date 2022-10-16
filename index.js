@@ -1,6 +1,5 @@
 import prompts from "prompts";
-import {getNumberOfNewsBuffered, getNewsFromNewsApi2, callAPI} from "./requests.js";
-
+import {callAPI} from "./requests.js";
 
 
 
@@ -31,15 +30,13 @@ async function example6(){
 	
 	
 	if(type === "buffered"){
-
-		return callAPI(number);
+		callAPI(number);
 	}
 	else{
-
-		return callAPI(number);
+		callAPI(number);
 	}
 
 
 }
 
-example6().then(console.log);
+example6();
