@@ -3,30 +3,28 @@ import NewsAPI from "newsapi";
 const newsapi = new NewsAPI("6b47cad506d34778bb7dfddf12b15ec2");
 
 
-async function getNumberOfNewsBuffered(numberOfArticles){
+async function getNumberOfNewsBuffered(numberOfnews){
 
-    const articlesPerPage = 20;
-    const numberOfLoops = Math.ceil(numberOfArticles / articlesPerPage);
+    const loops = Math.ceil(numberOfnews / 20);
     const arrayOfNews = [];
 
-    for (let i = 0; i < numberOfLoops; i++) {
+    for (let i = 0; i < loops; i++) {
         const response = await fetch(`http://hn.algolia.com/api/v1/search?page=${i}`);
         const json = await response.json();
         const result = json.hits.map(e => ansiEscapes.link(e.title, e.url));
         arrayOfNews.push(result);
     }
 
-    console.log(arrayOfNews.flat().slice(0,numberOfArticles).forEach(e => console.log(e)));
+    return arrayOfNews.flat().slice(0,numberOfnews);
 }
 
-async function getNewsFromNewsApi2(number){
+async function getNewsFromNewsApi2(numberOfNews){
 
-    const newsPerPage = 100;
-    const numberOfLoops = Math.ceil(number / newsPerPage);
+    const loops = Math.ceil(numberOfNews / 100);
     const arrayOfNews = [];
 
 
-    for(let i = 1; i <= numberOfLoops; i++){
+    for(let i = 1; i <= loops; i++){
 
         const newsJSON = await newsapi.v2.everything({
             q: "bitcoin",
@@ -41,14 +39,14 @@ async function getNewsFromNewsApi2(number){
     }
     
     
-    return arrayOfNews.flat().slice(0,number)
-                      .map(e => ansiEscapes.link(e.title, e.url))
-                      .forEach(e =>console.log(e));
+    return arrayOfNews.flat().slice(0,numberOfNews)
+                      .map(e => ansiEscapes.link(e.title, e.url));
 }
 
-function callAPI(number){
-    getNumberOfNewsBuffered(number);
-    getNewsFromNewsApi2(number);
+async function callAPI(number){
+    const arr = await getNumberOfNewsBuffered(number);
+    const arr2 = await getNewsFromNewsApi2(number);
+    return arr.concat(arr2).join("\n");
 }
 
 

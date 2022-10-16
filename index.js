@@ -30,10 +30,10 @@ async function example6(){
 	
 	
 	if(type === "buffered"){
-		callAPI(number);
+		callAPI(number).then(console.log);
 	}
 	else{
-		callAPI(number);
+		callAPI(number).then(console.log);
 	}
 
 
