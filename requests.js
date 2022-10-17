@@ -43,10 +43,16 @@ async function getNewsFromNewsApi2(numberOfNews){
 }
 
 
+function callIterator(number){
+    const arr = getNewsByIterator(number);
+    arr.then( arr => arr.forEach(e => console.log(e)));
+}
+
 async function callAPI(number){
     const arr = await getNumberOfNewsBuffered(number);
     const arr2 = await getNewsFromNewsApi2(number);
-    return arr.concat(arr2).join("\n");
+    console.log(arr.concat(arr2).join("\n"))
+
 }
 
 
@@ -71,42 +77,58 @@ async function* promisesToAsyncIterator(promises){
 
 async function getNewsByIterator(numOfNews) {
     
+    const loops2 = Math.ceil(numOfNews / 100);
     const loops = Math.ceil(numOfNews / 20);
     let newsApi = [];
    
     for (let i = 0; i < loops; i++) {
-      const response = await fetch(`https://hn.algolia.com/api/v1/search?page=${i}`);
-      const json = await response.json();
-      const title = json.hits.map(hit => ansiEscapes.link(hit.title, hit.url));
-      title.map(link => newsApi.push(new Promise(resolve => setTimeout(() => resolve(link), 500))));
+      const response = fetch(`https://hn.algolia.com/api/v1/search?page=${i}`);
+      newsApi.push(response);
     }
 
-    const loops2 = Math.ceil(numOfNews / 100);
-    let newsApi2 = [];
-
+  
     for (let i = 1; i <= loops2; i++) {
-        const newsJSON = await newsapi.v2.everything({
-            q: "bitcoin",
-            from: "2022-10-10",
-            to: "2022-10-11",
-            language: "en",
-            sortBt: "relevancy",
-            page:`${i}`
-        })
-
-      const title = newsJSON.articles.map(article => ansiEscapes.link(article.title, article.url));
-      title.map(link => newsApi2.push(new Promise(resolve => setTimeout(() => resolve(link), 500))));
-  }
-
-    const result = newsApi.flat().slice(0, numOfNews).concat(newsApi2.flat().slice(0, numOfNews));
-      
-    for await (const promiseValue of promisesToAsyncIterator(result)){
-        console.log(promiseValue);
+        const response = fetch(`https://newsapi.org/v2/everything?q=keyword&apiKey=88984fe341a64e4da9111e9f6eccf752&page=${i}`);
+        newsApi.push(response);
     }
+
+    const result = [];
+    let counterNews = numOfNews;
+    let counterNews2 = numOfNews;
+      
+    for await (const elem of promisesToAsyncIterator(newsApi)){
+        const response = await elem.json();
+
+        if(response.hits){
+            const links = response.hits.map(e => ansiEscapes.link(e.title, e.url));
+            if(links.length <= counterNews){
+                result.push(links);
+                counterNews -= links.length;
+            }
+            else{
+                result.push(links.slice(0,counterNews));
+            }
+        }
+
+        else{
+            const links = response.articles.map(e => ansiEscapes.link(e.title, e.url));
+
+            if(links.length <= counterNews2){
+                result.push(links);
+                counterNews2 -= links.length;
+            }
+            else{
+                result.push(links.slice(0,counterNews2)) 
+            }
+
+        }
+    }
+
+    return result.flat();
 }
 
 
-export {callAPI, getNewsByIterator};
+export {callAPI, getNewsByIterator, callIterator};
 
 
 

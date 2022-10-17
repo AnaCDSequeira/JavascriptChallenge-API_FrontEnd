@@ -1,7 +1,5 @@
 import prompts from "prompts";
-import {callAPI, getNewsByIterator} from "./requests.js";
-
-
+import {callAPI, getNewsByIterator, callIterator} from "./requests.js";
 
 async function example6(){
 
@@ -29,10 +27,10 @@ async function example6(){
 	const type = question2.value;	
 	
 	if(type === "buffered"){
-		callAPI(number).then(console.log);
+		callAPI(number);
 	}
 	else{
-		getNewsByIterator(number).then(console.log);
+		callIterator(number);
 	}
 }
 
